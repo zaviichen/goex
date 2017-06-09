@@ -9,7 +9,6 @@ import (
 	"strings"
 )
 
-
 func _httpRequest(client *http.Client, reqType string, reqUrl string, postData url.Values, requstHeaders map[string]string) ([]byte, error) {
 	req, _ := http.NewRequest(reqType, reqUrl, strings.NewReader(postData.Encode()))
 
@@ -60,6 +59,14 @@ func HttpGet(client *http.Client, reqUrl string) (map[string]interface{}, error)
 	return bodyDataMap, nil
 }
 
+func HttpGet2(client *http.Client, reqUrl string) ([]byte, error) {
+	respData, err := _httpRequest(client, "GET", reqUrl, url.Values{}, nil)
+	if err != nil {
+		return nil, err
+	}
+	return respData, nil
+}
+
 func HttpPostForm(client *http.Client, reqUrl string, postData url.Values) ([]byte, error) {
 	return _httpRequest(client, "POST", reqUrl, postData, nil)
 }
@@ -67,4 +74,3 @@ func HttpPostForm(client *http.Client, reqUrl string, postData url.Values) ([]by
 func HttpPostForm2(client *http.Client, reqUrl string, postData url.Values, headers map[string]string) ([]byte, error) {
 	return _httpRequest(client, "POST", reqUrl, postData, headers)
 }
-

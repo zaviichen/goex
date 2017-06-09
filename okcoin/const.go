@@ -111,24 +111,3 @@ const
 	CLOSE_BUY             //平多
 	CLOSE_SELL           //平空
 )
-
-var CurrencyPairSymbol = map[CurrencyPair]string{
-	BTC_CNY : "btc_cny",
-	BTC_USD : "btc_usd",
-	LTC_CNY : "ltc_cny",
-	LTC_USD : "ltc_usd",
-	ETH_CNY : "eth_cny",
-	ETH_USD : "eth_usd",
-	ETH_BTC : "eth_btc",
-	ETC_CNY : "etc_cny",
-	ETC_USD : "etc_usd",
-	ETC_BTC : "etc_btc"};
-
-var
-(
-	THIS_WEEK_CONTRACT = "this_week"; //周合约
-	NEXT_WEEK_CONTRACT = "next_week"; //次周合约
-	QUARTER_CONTRACT = "quarter"; //季度合约
-)
-
-
