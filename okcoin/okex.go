@@ -9,17 +9,19 @@ import (
 )
 
 const (
-	OKExName     = "OKEx"
-	OKExBaseUri  = "https://www.okcoin.com/api/v1/"
-	FutTickerUri = "future_ticker.do?symbol=%s&contract_type=%s"
-	FutDepthUri  = "future_depth.do?symbol=%s&contract_type=%s"
-	FutTradesUri = "future_trades.do?symbol=%s&contract_type=%s"
-	FutIndexUri = "future_index.do?symbol=%s"
+	OKExName         = "OKEx"
+	OKExBaseUri      = "https://www.okcoin.com/api/v1/"
+	FutTickerUri     = "future_ticker.do?symbol=%s&contract_type=%s"
+	FutDepthUri      = "future_depth.do?symbol=%s&contract_type=%s"
+	FutTradesUri     = "future_trades.do?symbol=%s&contract_type=%s"
+	FutIndexUri      = "future_index.do?symbol=%s"
+	FutEstimatedUri  = "future_estimated_price.do?symbol=%s"
+	FutHoldAmountUri = "future_hold_amount.do?symbol=%s&contract_type=%s"
 )
 
 const (
-	Weekly = "this_week"
-	BiWeekly = "next_week"
+	Weekly    = "this_week"
+	BiWeekly  = "next_week"
 	Quarterly = "quarter"
 )
 
@@ -29,6 +31,11 @@ type OKEx struct {
 	secretKey string
 	Name      string
 	BaseUri   string
+}
+
+type FutureInfo struct {
+	ContractName string
+	OpenInterest float64
 }
 
 func NewOKEx(client *http.Client, api string, secret string) *OKEx {
@@ -77,8 +84,7 @@ func (ctx *OKEx) GetFutTicker(currency CurrencyPair, contract string) (*Ticker, 
 	return t, nil
 }
 
-
-func (ctx *OKEx) GetFutDepth(currency CurrencyPair, contract string , size int) (*Depth, error) {
+func (ctx *OKEx) GetFutDepth(currency CurrencyPair, contract string, size int) (*Depth, error) {
 	url := fmt.Sprintf(ctx.BaseUri+FutDepthUri, ExPairSymbol[currency], contract)
 	dat, err := HttpGet(ctx.client, url)
 	if err != nil {
@@ -118,7 +124,6 @@ func (ctx *OKEx) GetFutDepth(currency CurrencyPair, contract string , size int) 
 
 	return &depth, nil
 }
-
 
 func (ctx *OKEx) GetFutTrades(currency CurrencyPair, contract string) ([]Trade, error) {
 	url := fmt.Sprintf(ctx.BaseUri+FutTradesUri, ExPairSymbol[currency], contract)
@@ -160,7 +165,32 @@ func (ctx *OKEx) GetFutIndex(currency CurrencyPair) (float64, error) {
 	if err != nil {
 		return 0, err
 	}
+	return dat["future_index"].(float64), nil
+}
 
-	index := dat["future_index"].(float64)
-	return index, nil
+func (ctx *OKEx) GetFutEstimatedPrice(currency CurrencyPair) (float64, error) {
+	url := fmt.Sprintf(ctx.BaseUri+FutEstimatedUri, ExPairSymbol[currency])
+	dat, err := HttpGet(ctx.client, url)
+	if err != nil {
+		return 0, err
+	}
+	return dat["forecast_price"].(float64), nil
+}
+
+func (ctx *OKEx) GetFutureInfo(currency CurrencyPair, contract string) (*FutureInfo, error) {
+	url := fmt.Sprintf(ctx.BaseUri+FutHoldAmountUri, ExPairSymbol[currency], contract)
+	dat, err := HttpGet2(ctx.client, url)
+	if err != nil {
+		return nil, err
+	}
+
+	rsp := struct {
+		Amount       float64
+		ContractName string `json:"contract_name"`
+	}{}
+	err = json.Unmarshal(dat, &rsp)
+	if err != nil {
+		return nil, err
+	}
+	return &FutureInfo{ContractName: rsp.ContractName, OpenInterest: rsp.Amount}, nil
 }

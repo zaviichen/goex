@@ -44,3 +44,21 @@ func TestOKEx_GetFutIndex(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestOKEx_GetFutEstimatedPrice(t *testing.T) {
+	index, err := okex.GetFutEstimatedPrice(fccy)
+	if err == nil {
+		t.Logf("Forecast Price: %+v", index)
+	} else {
+		t.Error(err)
+	}
+}
+
+func TestOKEx_GetFutureInfo(t *testing.T) {
+	info, err := okex.GetFutureInfo(fccy, fcontract)
+	if err == nil {
+		t.Logf("Future Info: %+v", info)
+	} else {
+		t.Error(err)
+	}
+}
