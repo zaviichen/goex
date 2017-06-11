@@ -110,7 +110,7 @@ type FutureOrder struct {
 	Amount       float64;
 	AvgPrice     float64;
 	DealAmount   float64;
-	OrderID      int64;
+	OrderID      string
 	OrderTime    int64;
 	Status       TradeStatus;
 	Currency     CurrencyPair;

@@ -77,13 +77,13 @@ func GetParamMD5Sign(_ string, params string) (string, error) {
 	return hex.EncodeToString(hash.Sum(nil)), nil
 }
 
-func (ctx *OKSpot) buildPostForm(postForm *url.Values) error {
-	postForm.Set("api_key", ctx.apiKey)
+func BuildPostForm(postForm *url.Values, apiKey, secretKey string) error {
+	postForm.Set("api_key", apiKey)
 
 	payload := postForm.Encode()
-	payload = payload + "&secret_key=" + ctx.secretKey
+	payload = payload + "&secret_key=" + secretKey
 
-	sign, err := GetParamMD5Sign(ctx.secretKey, payload)
+	sign, err := GetParamMD5Sign(secretKey, payload)
 	if err != nil {
 		return err
 	}
@@ -170,7 +170,7 @@ func (ctx *OKSpot) GetTrades(currency CurrencyPair, since int64) ([]Trade, error
 
 func (ctx *OKSpot) GetAccount() (*Account, error) {
 	postData := url.Values{}
-	err := ctx.buildPostForm(&postData)
+	err := BuildPostForm(&postData, ctx.apiKey, ctx.secretKey)
 	if err != nil {
 		return nil, err
 	}
@@ -255,7 +255,7 @@ func (ctx *OKSpot) SendOrder(currency CurrencyPair, side, price, amount string) 
 	}
 	postData.Set("symbol", ExPairSymbol[currency])
 
-	err := ctx.buildPostForm(&postData)
+	err := BuildPostForm(&postData, ctx.apiKey, ctx.secretKey)
 	if err != nil {
 		return nil, err
 	}
@@ -297,7 +297,7 @@ func (ctx *OKSpot) CancelOrder(currency CurrencyPair, orderId string) (bool, err
 	postData.Set("order_id", orderId)
 	postData.Set("symbol", ExPairSymbol[currency])
 
-	ctx.buildPostForm(&postData)
+	BuildPostForm(&postData, ctx.apiKey, ctx.secretKey)
 	body, err := HttpPostForm(ctx.client, ctx.BaseUri+CancelOrderUri, postData)
 	if err != nil {
 		return false, err
@@ -357,7 +357,7 @@ func (ctx *OKSpot) GetOrders(currency CurrencyPair, orderId string) ([]Order, er
 	postData.Set("order_id", orderId)
 	postData.Set("symbol", ExPairSymbol[currency])
 
-	ctx.buildPostForm(&postData)
+	BuildPostForm(&postData, ctx.apiKey, ctx.secretKey)
 	body, err := HttpPostForm(ctx.client, ctx.BaseUri+OrderInfoUri, postData)
 	if err != nil {
 		return nil, err
@@ -393,7 +393,7 @@ func (ctx *OKSpot) GetOrderHistory(currency CurrencyPair, currentPage, pageSize 
 	postData.Set("current_page", strconv.Itoa(currentPage))
 	postData.Set("page_length", strconv.Itoa(pageSize))
 
-	err := ctx.buildPostForm(&postData)
+	err := BuildPostForm(&postData, ctx.apiKey, ctx.secretKey)
 	body, err := HttpPostForm(ctx.client, ctx.BaseUri+OrderHistoryUri, postData)
 	if err != nil {
 		return nil, err
@@ -422,7 +422,7 @@ func (ctx *OKSpot) GetTradeHistory(currency CurrencyPair, since int64) ([]Trade,
 	postData.Set("symbol", ExPairSymbol[currency])
 	postData.Set("since", fmt.Sprintf("%d", since))
 
-	err := ctx.buildPostForm(&postData)
+	err := BuildPostForm(&postData, ctx.apiKey, ctx.secretKey)
 	body, err := HttpPostForm(ctx.client, ctx.BaseUri+TradeHistoryUri, postData)
 	if err != nil {
 		return nil, err

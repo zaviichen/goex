@@ -62,3 +62,65 @@ func TestOKEx_GetFutureInfo(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestOKEx_GetFutAccount(t *testing.T) {
+	dat, err := okex.GetFutAccount()
+	if err == nil {
+		t.Logf("Future Account: %+v", dat)
+	} else {
+		t.Error(err)
+	}
+}
+
+func TestOKEx_GetFutPosition(t *testing.T) {
+	dat, err := okex.GetFutPosition(fccy, fcontract)
+	if err == nil {
+		t.Logf("Future Position: %+v", dat)
+	} else {
+		t.Error(err)
+	}
+}
+
+
+func TestOKEx_BuyOrders(t *testing.T) {
+	depth, err := okex.GetFutDepth(fccy, fcontract,10)
+
+	ob := depth.BidList[len(depth.BidList)-1]
+	order, err := okex.SendFutOrder(fccy, fcontract, ob.Price, 1, 1, 0, 20)
+	if err == nil {
+		t.Logf("Send BuyOrder: %+v", order)
+	} else {
+		t.Error(err)
+	}
+
+	//var ids = []string {str(order.OrderID)}
+	//orders, err := okex.GetFutOrders(fccy, fcontract, ids)
+	//if err == nil {
+	//	t.Logf("Gey BuyOrders: %+v", orders)
+	//} else {
+	//	t.Error(err)
+	//}
+
+	//openOrders, err := okspot.GetOpenOrders(ccy)
+	//if err == nil {
+	//	t.Logf("Gey OpenOrders: %+v", openOrders)
+	//} else {
+	//	t.Error(err)
+	//}
+	//
+
+	status, err := okex.CancelFutOrder(fccy, fcontract, order.OrderID)
+	if status == true {
+		t.Logf("Cancel BuyOrder: %+v", status)
+	} else {
+		t.Error(err)
+	}
+	//
+	//time.Sleep(2 * time.Second)
+	//openOrders, err = okex.GetOpenOrders(ccy)
+	//if err == nil {
+	//	t.Logf("Gey OpenOrders after cancellation: %+v", openOrders)
+	//} else {
+	//	t.Error(t)
+	//}
+}

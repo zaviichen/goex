@@ -1,5 +1,7 @@
 package okcoin
 
+import "fmt"
+
 type CurrencyPair int;
 
 func (c CurrencyPair) String() string {
@@ -111,3 +113,7 @@ const
 	CLOSE_BUY             //平多
 	CLOSE_SELL           //平空
 )
+
+func str(a ...interface{}) string {
+	return fmt.Sprint(a)
+}
