@@ -316,7 +316,7 @@ func (ctx *OKEx) GetFutOrders(currency CurrencyPair, contract string, orderIds [
 
 func fillFutureOrder(currency CurrencyPair, omap map[string]interface{}) FutureOrder {
 	var order FutureOrder
-	order.OrderID = fstr(omap["order_id"].(float64))
+	order.OrderID = strconv.FormatFloat(omap["order_id"].(float64), 'f', -1, 64)
 	order.Amount = omap["amount"].(float64)
 	order.Price = omap["price"].(float64)
 	order.AvgPrice = omap["price_avg"].(float64)

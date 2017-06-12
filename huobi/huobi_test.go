@@ -35,3 +35,12 @@ func TestHuobi_GetTrades(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestHuobi_GetAccount(t *testing.T) {
+	dat, err := ex.GetAccount()
+	if err == nil {
+		t.Logf("Account: %+v", dat)
+	} else {
+		t.Error(err)
+	}
+}

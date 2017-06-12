@@ -11,6 +11,7 @@ import (
 	"strconv"
 	. "gexch/common"
 	"strings"
+	"encoding/json"
 )
 
 const (
@@ -180,4 +181,62 @@ func (ex *Huobi) GetTrades(ccy CurrencyPair) ([]Trade, error) {
 		trades = append(trades, trade)
 	}
 	return trades, nil
+}
+
+func (ex *Huobi) GetAccount() (*Account, error) {
+	postData := url.Values{}
+	postData.Set("method", "get_account_info")
+	postData.Set("created", fmt.Sprintf("%d", time.Now().Unix()))
+	postData.Set("access_key", ex.apiKey)
+	postData.Set("secret_key", ex.secretKey)
+
+	sign, _ := GetParamMD5Sign(ex.secretKey, postData.Encode())
+	postData.Set("sign", sign)
+	postData.Del("secret_key")
+
+	body, err := HttpPostForm(ex.client, TradeApiV3Uri, postData)
+	if err != nil {
+		return nil, err
+	}
+
+	var dat map[string]interface{}
+	err = json.Unmarshal(body, &dat)
+	if err != nil {
+		println(string(body))
+		return nil, err
+	}
+
+	if dat["code"] != nil {
+		return nil, errors.New(fmt.Sprintf("%s", dat))
+	}
+
+	account := new(Account)
+	account.Exchange = ex.Name
+	account.Asset, _ = strconv.ParseFloat(dat["total"].(string), 64)
+	account.NetAsset, _ = strconv.ParseFloat(dat["net_asset"].(string), 64)
+	
+	var btc SubAccount
+	var ltc SubAccount
+	var cny SubAccount
+	
+	btc.Currency = BTC
+	btc.Amount, _ = strconv.ParseFloat(dat["available_btc_display"].(string), 64)
+	btc.LoanAmount, _ = strconv.ParseFloat(dat["loan_btc_display"].(string), 64)
+	btc.ForzenAmount, _ = strconv.ParseFloat(dat["frozen_btc_display"].(string), 64)
+	
+	ltc.Currency = LTC
+	ltc.Amount, _ = strconv.ParseFloat(dat["available_ltc_display"].(string), 64)
+	ltc.LoanAmount, _ = strconv.ParseFloat(dat["loan_ltc_display"].(string), 64)
+	ltc.ForzenAmount, _ = strconv.ParseFloat(dat["frozen_ltc_display"].(string), 64)
+	
+	cny.Currency = CNY
+	cny.Amount, _ = strconv.ParseFloat(dat["available_cny_display"].(string), 64)
+	cny.LoanAmount, _ = strconv.ParseFloat(dat["loan_cny_display"].(string), 64)
+	cny.ForzenAmount, _ = strconv.ParseFloat(dat["frozen_cny_display"].(string), 64)
+
+	account.SubAccounts = make(map[Currency]SubAccount, 3)
+	account.SubAccounts[BTC] = btc
+	account.SubAccounts[LTC] = ltc
+	account.SubAccounts[CNY] = cny
+	return account, nil
 }
