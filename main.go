@@ -1,16 +1,23 @@
 package main
 
 import (
-	"net/http"
 	"fmt"
-	. "gexch/okcoin"
 )
 
-func main() {
-	api := New(http.DefaultClient, "", "")
+func str(a ...interface{}) string {
+	fmt.Println(fmt.Sprint(a))
+	return fmt.Sprint(a)
+}
 
-	ticker, err := api.GetTicker(BTC_CNY)
-	fmt.Println(ticker)
-	fmt.Println(err)
+func main() {
+	//api := New(http.DefaultClient, "", "")
+	//
+	//ticker, err := api.GetTicker(BTC_CNY)
+	//fmt.Println(ticker)
+	//fmt.Println(err)
+
+	a := 1
+	b := str(a)
+	fmt.Println(b)
 }
 

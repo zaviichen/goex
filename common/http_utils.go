@@ -1,4 +1,4 @@
-package okcoin
+package common
 
 import (
 	"io/ioutil"

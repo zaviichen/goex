@@ -1,6 +1,9 @@
-package okcoin
+package common
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+)
 
 type CurrencyPair int;
 
@@ -117,3 +120,8 @@ const
 func str(a ...interface{}) string {
 	return fmt.Sprint(a)
 }
+
+func fstr(f float64) string {
+	return strconv.FormatFloat(f, 'f', -1, 64)
+}
+

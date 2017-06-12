@@ -5,6 +5,7 @@ import (
 	"testing"
 	"fmt"
 	"time"
+	. "gexch/common"
 )
 
 var ccy CurrencyPair = BTC_CNY

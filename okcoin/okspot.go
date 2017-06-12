@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"encoding/json"
 	"errors"
+	. "gexch/common"
 )
 
 const (

@@ -8,6 +8,7 @@ import (
 	"errors"
 	"net/url"
 	"strings"
+	. "gexch/common"
 )
 
 const (
@@ -315,7 +316,7 @@ func (ctx *OKEx) GetFutOrders(currency CurrencyPair, contract string, orderIds [
 
 func fillFutureOrder(currency CurrencyPair, omap map[string]interface{}) FutureOrder {
 	var order FutureOrder
-	order.OrderID = str(omap["order_id"].(float64))
+	order.OrderID = fstr(omap["order_id"].(float64))
 	order.Amount = omap["amount"].(float64)
 	order.Price = omap["price"].(float64)
 	order.AvgPrice = omap["price_avg"].(float64)
@@ -362,20 +363,10 @@ func (ctx *OKEx) SendFutOrder(ccy CurrencyPair, contract string, price, amount f
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(string(dat))
-
-	//respMap := make(map[string]interface{})
-	//err = json.Unmarshal(dat, &respMap)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	//if respMap["result"] != nil && !respMap["result"].(bool) {
-	//	return nil, errors.New(string(dat))
-	//}
+	//fmt.Println(string(dat))
 
 	rsp := struct {
-		OrderID float64
+		OrderID int64 `json:"order_id,int64"`
 		Result  bool `json:"result,bool"`
 	}{}
 	err = json.Unmarshal(dat, &rsp)
@@ -387,10 +378,8 @@ func (ctx *OKEx) SendFutOrder(ccy CurrencyPair, contract string, price, amount f
 		return nil, errors.New(string(dat))
 	}
 
-	fmt.Println(rsp)
 	fut := new(FutureOrder)
-	//fmt.Println("rspmap:", )
-	fut.OrderID = fmt.Sprintf("%0.f", rsp.OrderID)
+	fut.OrderID = strconv.FormatInt(rsp.OrderID, 10)
 	fut.Price = price
 	fut.Amount = amount
 	fut.Currency = ccy
@@ -428,4 +417,42 @@ func (ctx *OKEx) CancelFutOrder(ccy CurrencyPair, contract, orderId string) (boo
 	}
 
 	return true, nil
+}
+
+func (ctx *OKEx) GetFutOpenOrders(ccy CurrencyPair, contract string) ([]FutureOrder, error) {
+	postData := url.Values{}
+	postData.Set("order_id", "-1")
+	postData.Set("contract_type", contract)
+	postData.Set("symbol", ExPairSymbol[ccy])
+	postData.Set("status", "1")
+	postData.Set("current_page", "1")
+	postData.Set("page_length", "100")
+
+	err := BuildPostForm(&postData, ctx.apiKey, ctx.secretKey)
+	if err != nil {
+		return nil, err
+	}
+
+	dat, err := HttpPostForm(ctx.client, ctx.BaseUri+FutOrderInfo, postData)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(string(dat))
+
+	var respMap map[string]interface{}
+	err = json.Unmarshal(dat, &respMap)
+	if err != nil {
+		return nil, err
+	}
+
+	if !respMap["result"].(bool) {
+		return nil, errors.New(string(dat))
+	}
+
+	var orders []FutureOrder
+	for _, v := range respMap["orders"].([]interface{}) {
+		order := fillFutureOrder(ccy, v.(map[string]interface{}))
+		orders = append(orders, order)
+	}
+	return orders, nil
 }
