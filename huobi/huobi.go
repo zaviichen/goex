@@ -2,8 +2,6 @@ package huobi
 
 import (
 	"net/http"
-	"crypto/md5"
-	"encoding/hex"
 	"net/url"
 	"fmt"
 	"time"
@@ -24,43 +22,20 @@ const (
 )
 
 type Huobi struct {
-	client    *http.Client
-	apiKey    string
-	secretKey string
-	Name      string
-	BaseUri   string
+	ExchangeBase
 }
 
 func NewHuobi(client *http.Client, api string, secret string) *Huobi {
 	ex := new(Huobi)
-	ex.client = client
-	ex.apiKey = api
-	ex.secretKey = secret
 	ex.Name = HuobiName
 	ex.BaseUri = BaseUri
+	ex.Enable = true
+	ex.HttpClient = client
+	ex.ApiKey = api
+	ex.SecretKey = secret
+	ex.MakerFee = 0.004
+	ex.TakerFee = 0.004
 	return ex
-}
-
-func GetParamMD5Sign(_ string, params string) (string, error) {
-	hash := md5.New()
-	_, err := hash.Write([]byte(params))
-	if err != nil {
-		return "", err
-	}
-	return hex.EncodeToString(hash.Sum(nil)), nil
-}
-
-func BuildPostForm(postForm *url.Values, apiKey, secretKey string) error {
-	postForm.Set("created", fmt.Sprintf("%d", time.Now().Unix()))
-	postForm.Set("access_key", apiKey)
-	postForm.Set("secret_key", secretKey)
-	sign, err := GetParamMD5Sign(secretKey, postForm.Encode())
-	if err != nil {
-		return err
-	}
-	postForm.Set("sign", sign)
-	postForm.Del("secret_key")
-	return nil
 }
 
 func (ex *Huobi) GetTicker(ccy CurrencyPair) (*Ticker, error) {
@@ -74,7 +49,7 @@ func (ex *Huobi) GetTicker(ccy CurrencyPair) (*Ticker, error) {
 		return nil, errors.New("Unsupport The CurrencyPair")
 	}
 
-	dat, err := HttpGet(ex.client, url)
+	dat, err := HttpGet(ex.HttpClient, url)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +77,7 @@ func (ex *Huobi) GetDepth(ccy CurrencyPair, size int) (*Depth, error) {
 		return nil, errors.New("Unsupport The CurrencyPair")
 	}
 
-	dat, err := HttpGet(ex.client, url)
+	dat, err := HttpGet(ex.HttpClient, url)
 	if err != nil {
 		return nil, err
 	}
@@ -148,7 +123,7 @@ func (ex *Huobi) GetTrades(ccy CurrencyPair) ([]Trade, error) {
 		return nil, errors.New("Unsupport The CurrencyPair")
 	}
 
-	dat, err := HttpGet(ex.client, url)
+	dat, err := HttpGet(ex.HttpClient, url)
 	if err != nil {
 		return nil, err
 	}
@@ -183,60 +158,43 @@ func (ex *Huobi) GetTrades(ccy CurrencyPair) ([]Trade, error) {
 	return trades, nil
 }
 
-func (ex *Huobi) GetAccount() (*Account, error) {
-	postData := url.Values{}
-	postData.Set("method", "get_account_info")
-	postData.Set("created", fmt.Sprintf("%d", time.Now().Unix()))
-	postData.Set("access_key", ex.apiKey)
-	postData.Set("secret_key", ex.secretKey)
+func (ex *Huobi) PostRequest(method string, v url.Values, result interface{}) (err error) {
+	v.Set("method", method)
+	v.Set("created", fmt.Sprintf("%d", time.Now().Unix()))
+	v.Set("access_key", ex.ApiKey)
 
-	sign, _ := GetParamMD5Sign(ex.secretKey, postData.Encode())
-	postData.Set("sign", sign)
-	postData.Del("secret_key")
+	hash := GetMD5([]byte(v.Encode() + "&secret_key=" + ex.SecretKey))
+	v.Set("sign", StringToLower(HexEncodeToString(hash)))
 
-	body, err := HttpPostForm(ex.client, TradeApiV3Uri, postData)
+	body, err := HttpPostForm(ex.HttpClient, TradeApiV3Uri, v)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	var dat map[string]interface{}
-	err = json.Unmarshal(body, &dat)
+	err = json.Unmarshal(body, &result)
 	if err != nil {
 		println(string(body))
+		return err
+	}
+	return nil
+}
+
+func (ex *Huobi) GetAccount() (*Account, error) {
+	v := url.Values{}
+
+	x := new(_AccountInfo)
+	err := ex.PostRequest("get_account_info", v, x)
+	if err != nil {
 		return nil, err
 	}
 
-	if dat["code"] != nil {
-		return nil, errors.New(fmt.Sprintf("%s", dat))
-	}
-
-	account := new(Account)
-	account.Exchange = ex.Name
-	account.Asset, _ = strconv.ParseFloat(dat["total"].(string), 64)
-	account.NetAsset, _ = strconv.ParseFloat(dat["net_asset"].(string), 64)
-	
-	var btc SubAccount
-	var ltc SubAccount
-	var cny SubAccount
-	
-	btc.Currency = BTC
-	btc.Amount, _ = strconv.ParseFloat(dat["available_btc_display"].(string), 64)
-	btc.LoanAmount, _ = strconv.ParseFloat(dat["loan_btc_display"].(string), 64)
-	btc.ForzenAmount, _ = strconv.ParseFloat(dat["frozen_btc_display"].(string), 64)
-	
-	ltc.Currency = LTC
-	ltc.Amount, _ = strconv.ParseFloat(dat["available_ltc_display"].(string), 64)
-	ltc.LoanAmount, _ = strconv.ParseFloat(dat["loan_ltc_display"].(string), 64)
-	ltc.ForzenAmount, _ = strconv.ParseFloat(dat["frozen_ltc_display"].(string), 64)
-	
-	cny.Currency = CNY
-	cny.Amount, _ = strconv.ParseFloat(dat["available_cny_display"].(string), 64)
-	cny.LoanAmount, _ = strconv.ParseFloat(dat["loan_cny_display"].(string), 64)
-	cny.ForzenAmount, _ = strconv.ParseFloat(dat["frozen_cny_display"].(string), 64)
-
-	account.SubAccounts = make(map[Currency]SubAccount, 3)
-	account.SubAccounts[BTC] = btc
-	account.SubAccounts[LTC] = ltc
-	account.SubAccounts[CNY] = cny
-	return account, nil
+	acc := new(Account)
+	acc.Exchange = ex.Name
+	acc.Asset = x.Total
+	acc.NetAsset = x.NetAsset
+	acc.SubAccounts = make(map[Currency]SubAccount, 3)
+	acc.SubAccounts[BTC] = SubAccount{BTC, x.AvailableBtc, x.FrozenBtc, x.LoanBtc}
+	acc.SubAccounts[LTC] = SubAccount{LTC, x.AvailableLtc, x.FrozenLtc, x.LoanLtc}
+	acc.SubAccounts[CNY] = SubAccount{CNY, x.AvailableCny, x.FrozenCny, x.LoanCny}
+	return acc, nil
 }

@@ -35,11 +35,8 @@ const (
 )
 
 type OKEx struct {
-	client    *http.Client
-	apiKey    string
-	secretKey string
-	Name      string
-	BaseUri   string
+	ExchangeBase
+	OpenFee, CloseFee, DeliveryFee float64
 }
 
 type FutureInfo struct {
@@ -49,53 +46,40 @@ type FutureInfo struct {
 
 func NewOKEx(client *http.Client, api string, secret string) *OKEx {
 	ex := new(OKEx)
-	ex.client = client
-	ex.apiKey = api
-	ex.secretKey = secret
 	ex.Name = OKExName
 	ex.BaseUri = OKExBaseUri
+	ex.Enable = true
+	ex.HttpClient = client
+	ex.ApiKey = api
+	ex.SecretKey = secret
+	ex.OpenFee = 0.0003
+	ex.CloseFee = 0
+	ex.DeliveryFee = 0
 	return ex
 }
 
-func (ctx *OKEx) GetFutTicker(currency CurrencyPair, contract string) (*Ticker, error) {
-	url := fmt.Sprintf(ctx.BaseUri+FutTickerUri, ExPairSymbol[currency], contract)
-	dat, err := HttpGet2(ctx.client, url)
-	if err != nil {
-		return nil, err
-	}
-
-	rsp := struct {
-		Date string
-		Ticker struct {
-			Last       float64
-			High       float64
-			Low        float64
-			Buy        float64
-			Sell       float64
-			Vol        float64
-			ContractID int `json:"contract_id"`
-			UnitAmount int `json:"unit_amount"`
-		}
-	}{}
-	err = json.Unmarshal(dat, &rsp)
+func (ex *OKEx) GetFutTicker(currency CurrencyPair, contract string) (*Ticker, error) {
+	url := fmt.Sprintf(ex.BaseUri+FutTickerUri, ExPairSymbol[currency], contract)
+	x := _FuturesTickerResponse{}
+	err := GetRequest(ex.HttpClient, url, true, &x)
 	if err != nil {
 		return nil, err
 	}
 
 	t := new(Ticker)
-	t.Date, _ = strconv.ParseUint(rsp.Date, 10, 64)
-	t.Buy = rsp.Ticker.Buy
-	t.Sell = rsp.Ticker.Sell
-	t.High = rsp.Ticker.High
-	t.Last = rsp.Ticker.Last
-	t.Low = rsp.Ticker.Low
-	t.Vol = rsp.Ticker.Vol
+	t.Date, _ = strconv.ParseUint(x.Date, 10, 64)
+	t.Buy = x.Ticker.Buy
+	t.Sell = x.Ticker.Sell
+	t.High = x.Ticker.High
+	t.Last = x.Ticker.Last
+	t.Low = x.Ticker.Low
+	t.Vol = x.Ticker.Vol
 	return t, nil
 }
 
-func (ctx *OKEx) GetFutDepth(currency CurrencyPair, contract string, size int) (*Depth, error) {
-	url := fmt.Sprintf(ctx.BaseUri+FutDepthUri, ExPairSymbol[currency], contract)
-	dat, err := HttpGet(ctx.client, url)
+func (ex *OKEx) GetFutDepth(currency CurrencyPair, contract string, size int) (*Depth, error) {
+	url := fmt.Sprintf(ex.BaseUri+FutDepthUri, ExPairSymbol[currency], contract)
+	dat, err := HttpGet(ex.HttpClient, url)
 	if err != nil {
 		return nil, err
 	}
@@ -134,9 +118,9 @@ func (ctx *OKEx) GetFutDepth(currency CurrencyPair, contract string, size int) (
 	return &depth, nil
 }
 
-func (ctx *OKEx) GetFutTrades(currency CurrencyPair, contract string) ([]Trade, error) {
-	url := fmt.Sprintf(ctx.BaseUri+FutTradesUri, ExPairSymbol[currency], contract)
-	dat, err := HttpGet2(ctx.client, url)
+func (ex *OKEx) GetFutTrades(currency CurrencyPair, contract string) ([]Trade, error) {
+	url := fmt.Sprintf(ex.BaseUri+FutTradesUri, ExPairSymbol[currency], contract)
+	dat, err := HttpGet2(ex.HttpClient, url)
 	if err != nil {
 		return nil, err
 	}
@@ -168,27 +152,27 @@ func (ctx *OKEx) GetFutTrades(currency CurrencyPair, contract string) ([]Trade, 
 	return trades, nil
 }
 
-func (ctx *OKEx) GetFutIndex(currency CurrencyPair) (float64, error) {
-	url := fmt.Sprintf(ctx.BaseUri+FutIndexUri, ExPairSymbol[currency])
-	dat, err := HttpGet(ctx.client, url)
+func (ex *OKEx) GetFutIndex(currency CurrencyPair) (float64, error) {
+	url := fmt.Sprintf(ex.BaseUri+FutIndexUri, ExPairSymbol[currency])
+	dat, err := HttpGet(ex.HttpClient, url)
 	if err != nil {
 		return 0, err
 	}
 	return dat["future_index"].(float64), nil
 }
 
-func (ctx *OKEx) GetFutEstimatedPrice(currency CurrencyPair) (float64, error) {
-	url := fmt.Sprintf(ctx.BaseUri+FutEstimatedUri, ExPairSymbol[currency])
-	dat, err := HttpGet(ctx.client, url)
+func (ex *OKEx) GetFutEstimatedPrice(currency CurrencyPair) (float64, error) {
+	url := fmt.Sprintf(ex.BaseUri+FutEstimatedUri, ExPairSymbol[currency])
+	dat, err := HttpGet(ex.HttpClient, url)
 	if err != nil {
 		return 0, err
 	}
 	return dat["forecast_price"].(float64), nil
 }
 
-func (ctx *OKEx) GetFutureInfo(currency CurrencyPair, contract string) (*FutureInfo, error) {
-	url := fmt.Sprintf(ctx.BaseUri+FutHoldAmountUri, ExPairSymbol[currency], contract)
-	dat, err := HttpGet2(ctx.client, url)
+func (ex *OKEx) GetFutureInfo(currency CurrencyPair, contract string) (*FutureInfo, error) {
+	url := fmt.Sprintf(ex.BaseUri+FutHoldAmountUri, ExPairSymbol[currency], contract)
+	dat, err := HttpGet2(ex.HttpClient, url)
 	if err != nil {
 		return nil, err
 	}
@@ -204,14 +188,14 @@ func (ctx *OKEx) GetFutureInfo(currency CurrencyPair, contract string) (*FutureI
 	return &FutureInfo{ContractName: rsp.ContractName, OpenInterest: rsp.Amount}, nil
 }
 
-func (ctx *OKEx) GetFutAccount() (*FutureAccount, error) {
+func (ex *OKEx) GetFutAccount() (*FutureAccount, error) {
 	postData := url.Values{}
-	err := BuildPostForm(&postData, ctx.apiKey, ctx.secretKey)
+	err := BuildPostForm(&postData, ex.ApiKey, ex.SecretKey)
 	if err != nil {
 		return nil, err
 	}
 
-	dat, err := HttpPostForm(ctx.client, ctx.BaseUri+FutUserInfoUri, postData)
+	dat, err := HttpPostForm(ex.HttpClient, ex.BaseUri+FutUserInfoUri, postData)
 	if err != nil {
 		return nil, err
 	}
@@ -245,17 +229,17 @@ func (ctx *OKEx) GetFutAccount() (*FutureAccount, error) {
 	return account, nil
 }
 
-func (ctx *OKEx) GetFutPosition(currency CurrencyPair, contract string) ([]FuturePosition, error) {
+func (ex *OKEx) GetFutPosition(currency CurrencyPair, contract string) ([]FuturePosition, error) {
 	postData := url.Values{}
 	postData.Set("symbol", ExPairSymbol[currency])
 	postData.Set("contract_type", contract)
 
-	err := BuildPostForm(&postData, ctx.apiKey, ctx.secretKey)
+	err := BuildPostForm(&postData, ex.ApiKey, ex.SecretKey)
 	if err != nil {
 		return nil, err
 	}
 
-	dat, err := HttpPostForm(ctx.client, ctx.BaseUri+FutPositionUri, postData)
+	dat, err := HttpPostForm(ex.HttpClient, ex.BaseUri+FutPositionUri, postData)
 	if err != nil {
 		return nil, err
 	}
@@ -278,18 +262,18 @@ func (ctx *OKEx) GetFutPosition(currency CurrencyPair, contract string) ([]Futur
 	return pos, nil
 }
 
-func (ctx *OKEx) GetFutOrders(currency CurrencyPair, contract string, orderIds []string) ([]FutureOrder, error) {
+func (ex *OKEx) GetFutOrders(currency CurrencyPair, contract string, orderIds []string) ([]FutureOrder, error) {
 	postData := url.Values{}
 	postData.Set("order_id", strings.Join(orderIds, ","))
 	postData.Set("symbol", ExPairSymbol[currency])
 	postData.Set("contract_type", contract)
 
-	err := BuildPostForm(&postData, ctx.apiKey, ctx.secretKey)
+	err := BuildPostForm(&postData, ex.ApiKey, ex.SecretKey)
 	if err != nil {
 		return nil, err
 	}
 
-	dat, err := HttpPostForm(ctx.client, ctx.BaseUri+FutOrdersInfo, postData)
+	dat, err := HttpPostForm(ex.HttpClient, ex.BaseUri+FutOrdersInfo, postData)
 	if err != nil {
 		return nil, err
 	}
@@ -344,7 +328,7 @@ func fillFutureOrder(currency CurrencyPair, omap map[string]interface{}) FutureO
 	return order
 }
 
-func (ctx *OKEx) SendFutOrder(ccy CurrencyPair, contract string, price, amount float64, openType, matchPrice, leverRate int) (*FutureOrder, error) {
+func (ex *OKEx) SendFutOrder(ccy CurrencyPair, contract string, price, amount float64, openType, matchPrice, leverRate int) (*FutureOrder, error) {
 	postData := url.Values{}
 	postData.Set("symbol", ExPairSymbol[ccy])
 	postData.Set("price", fmt.Sprint(price))
@@ -354,12 +338,12 @@ func (ctx *OKEx) SendFutOrder(ccy CurrencyPair, contract string, price, amount f
 	postData.Set("lever_rate", strconv.Itoa(leverRate))
 	postData.Set("match_price", strconv.Itoa(matchPrice))
 
-	err := BuildPostForm(&postData, ctx.apiKey, ctx.secretKey)
+	err := BuildPostForm(&postData, ex.ApiKey, ex.SecretKey)
 	if err != nil {
 		return nil, err
 	}
 
-	dat, err := HttpPostForm(ctx.client, ctx.BaseUri+FutTrade, postData)
+	dat, err := HttpPostForm(ex.HttpClient, ex.BaseUri+FutTrade, postData)
 	if err != nil {
 		return nil, err
 	}
@@ -389,18 +373,18 @@ func (ctx *OKEx) SendFutOrder(ccy CurrencyPair, contract string, price, amount f
 	return fut, nil
 }
 
-func (ctx *OKEx) CancelFutOrder(ccy CurrencyPair, contract, orderId string) (bool, error) {
+func (ex *OKEx) CancelFutOrder(ccy CurrencyPair, contract, orderId string) (bool, error) {
 	postData := url.Values{}
 	postData.Set("symbol", ExPairSymbol[ccy])
 	postData.Set("order_id", orderId)
 	postData.Set("contract_type", contract)
 
-	err := BuildPostForm(&postData, ctx.apiKey, ctx.secretKey)
+	err := BuildPostForm(&postData, ex.ApiKey, ex.SecretKey)
 	if err != nil {
 		return false, err
 	}
 
-	dat, err := HttpPostForm(ctx.client, ctx.BaseUri+FutCancel, postData)
+	dat, err := HttpPostForm(ex.HttpClient, ex.BaseUri+FutCancel, postData)
 	if err != nil {
 		return false, err
 	}
@@ -419,7 +403,7 @@ func (ctx *OKEx) CancelFutOrder(ccy CurrencyPair, contract, orderId string) (boo
 	return true, nil
 }
 
-func (ctx *OKEx) GetFutOpenOrders(ccy CurrencyPair, contract string) ([]FutureOrder, error) {
+func (ex *OKEx) GetFutOpenOrders(ccy CurrencyPair, contract string) ([]FutureOrder, error) {
 	postData := url.Values{}
 	postData.Set("order_id", "-1")
 	postData.Set("contract_type", contract)
@@ -428,12 +412,12 @@ func (ctx *OKEx) GetFutOpenOrders(ccy CurrencyPair, contract string) ([]FutureOr
 	postData.Set("current_page", "1")
 	postData.Set("page_length", "100")
 
-	err := BuildPostForm(&postData, ctx.apiKey, ctx.secretKey)
+	err := BuildPostForm(&postData, ex.ApiKey, ex.SecretKey)
 	if err != nil {
 		return nil, err
 	}
 
-	dat, err := HttpPostForm(ctx.client, ctx.BaseUri+FutOrderInfo, postData)
+	dat, err := HttpPostForm(ex.HttpClient, ex.BaseUri+FutOrderInfo, postData)
 	if err != nil {
 		return nil, err
 	}

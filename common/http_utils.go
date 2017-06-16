@@ -67,6 +67,24 @@ func HttpGet2(client *http.Client, reqUrl string) ([]byte, error) {
 	return respData, nil
 }
 
+func GetRequest(client *http.Client, reqUrl string, jsonDecode bool, result interface{}) (error) {
+	rsp, err := _httpRequest(client, "GET", reqUrl, url.Values{}, nil)
+	if err != nil {
+		return err
+	}
+
+	if jsonDecode {
+		err = json.Unmarshal(rsp, &result)
+		if err != nil {
+			return err
+		}
+	} else {
+		result = &rsp
+	}
+
+	return nil
+}
+
 func HttpPostForm(client *http.Client, reqUrl string, postData url.Values) ([]byte, error) {
 	return _httpRequest(client, "POST", reqUrl, postData, nil)
 }

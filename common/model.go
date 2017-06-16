@@ -7,7 +7,7 @@ type Order struct {
 	Amount,
 	AvgPrice,
 	DealAmount,
-	Fee       float64;
+	Fee float64;
 	OrderID   int;
 	OrderTime int;
 	Status    TradeStatus;
@@ -24,10 +24,10 @@ type Trade struct {
 }
 
 type SubAccount struct {
-	Currency   Currency;
-	Amount,
-	ForzenAmount,
-	LoanAmount float64;
+	Currency     Currency
+	Amount       float64
+	ForzenAmount float64
+	LoanAmount   float64
 }
 
 type Account struct {
@@ -75,7 +75,7 @@ type APIConfig struct {
 	HttpClient *http.Client;
 	ApiUrl,
 	AccessKey,
-	SecretKey  string;
+	SecretKey string;
 }
 
 type Kline struct {
@@ -84,7 +84,7 @@ type Kline struct {
 	Close,
 	High,
 	Low,
-	Vol       float64;
+	Vol float64;
 }
 
 type FutureKline struct {
@@ -136,5 +136,5 @@ type FuturePosition struct {
 	Symbol         CurrencyPair; //btc_usd:比特币,ltc_usd:莱特币
 	ContractType   string;
 	ContractId     int64;
-	ForceLiquPrice float64;      //预估爆仓价
+	ForceLiquPrice float64; //预估爆仓价
 }

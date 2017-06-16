@@ -4,8 +4,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"crypto/md5"
-	"encoding/hex"
 	"strconv"
 	"fmt"
 	"encoding/json"
@@ -69,14 +67,14 @@ func NewOKCom(client *http.Client, api string, secret string) *OKSpot {
 	return ex
 }
 
-func GetParamMD5Sign(_ string, params string) (string, error) {
-	hash := md5.New()
-	_, err := hash.Write([]byte(params))
-	if err != nil {
-		return "", err
-	}
-	return hex.EncodeToString(hash.Sum(nil)), nil
-}
+//func GetParamMD5Sign(_ string, params string) (string, error) {
+//	hash := md5.New()
+//	_, err := hash.Write([]byte(params))
+//	if err != nil {
+//		return "", err
+//	}
+//	return hex.EncodeToString(hash.Sum(nil)), nil
+//}
 
 func BuildPostForm(postForm *url.Values, apiKey, secretKey string) error {
 	postForm.Set("api_key", apiKey)
