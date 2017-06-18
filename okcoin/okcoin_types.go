@@ -1,6 +1,6 @@
 package okcoin
 
-type _Ticker struct {
+type OKCoinTicker struct {
 	Buy  float64 `json:",string"`
 	High float64 `json:",string"`
 	Last float64 `json:",string"`
@@ -9,12 +9,11 @@ type _Ticker struct {
 	Vol  float64 `json:",string"`
 }
 
-type _TickerResponse struct {
+type OKCoinTickerResponse struct {
 	Date   string
-	Ticker _Ticker
+	Ticker OKCoinTicker
 }
-
-type _FuturesTicker struct {
+type OKCoinFuturesTicker struct {
 	Last        float64
 	Buy         float64
 	Sell        float64
@@ -25,17 +24,17 @@ type _FuturesTicker struct {
 	Unit_Amount float64
 }
 
-type _Orderbook struct {
+type OKCoinOrderbook struct {
 	Asks [][]float64 `json:"asks"`
 	Bids [][]float64 `json:"bids"`
 }
 
-type _FuturesTickerResponse struct {
+type OKCoinFuturesTickerResponse struct {
 	Date   string
-	Ticker _FuturesTicker
+	Ticker OKCoinFuturesTicker
 }
 
-type _BorrowInfo struct {
+type OKCoinBorrowInfo struct {
 	BorrowBTC        float64 `json:"borrow_btc"`
 	BorrowLTC        float64 `json:"borrow_ltc"`
 	BorrowCNY        float64 `json:"borrow_cny"`
@@ -48,7 +47,7 @@ type _BorrowInfo struct {
 	DailyInterestCNY float64 `json:"today_interest_cny"`
 }
 
-type _BorrowOrder struct {
+type OKCoinBorrowOrder struct {
 	Amount      float64 `json:"amount"`
 	BorrowDate  int64   `json:"borrow_date"`
 	BorrowID    int64   `json:"borrow_id"`
@@ -59,7 +58,7 @@ type _BorrowOrder struct {
 	Symbol      string  `json:"symbol"`
 }
 
-type _Record struct {
+type OKCoinRecord struct {
 	Address            string  `json:"addr"`
 	Account            int64   `json:"account,string"`
 	Amount             float64 `json:"amount"`
@@ -70,12 +69,12 @@ type _Record struct {
 	Date               float64 `json:"date"`
 }
 
-type _AccountRecords struct {
-	Records []_Record `json:"records"`
+type OKCoinAccountRecords struct {
+	Records []OKCoinRecord `json:"records"`
 	Symbol  string         `json:"symbol"`
 }
 
-type _FuturesOrder struct {
+type OKCoinFuturesOrder struct {
 	Amount       float64 `json:"amount"`
 	ContractName string  `json:"contract_name"`
 	DateCreated  float64 `json:"create_date"`
@@ -91,19 +90,19 @@ type _FuturesOrder struct {
 	UnitAmount   int64   `json:"unit_amount"`
 }
 
-type _FuturesHoldAmount struct {
+type OKCoinFuturesHoldAmount struct {
 	Amount       float64 `json:"amount"`
 	ContractName string  `json:"contract_name"`
 }
 
-type _FuturesExplosive struct {
+type OKCoinFuturesExplosive struct {
 	Amount      float64 `json:"amount,string"`
 	DateCreated string  `json:"create_date"`
 	Loss        float64 `json:"loss,string"`
 	Type        int64   `json:"type"`
 }
 
-type _Trades struct {
+type OKCoinTrades struct {
 	Amount  float64 `json:"amount,string"`
 	Date    int64   `json:"date"`
 	DateMS  int64   `json:"date_ms"`
@@ -112,7 +111,7 @@ type _Trades struct {
 	Type    string  `json:"type"`
 }
 
-type _FuturesTrades struct {
+type OKCoinFuturesTrades struct {
 	Amount  float64 `json:"amount"`
 	Date    int64   `json:"date"`
 	DateMS  int64   `json:"date_ms"`
@@ -121,7 +120,27 @@ type _FuturesTrades struct {
 	Type    string  `json:"type"`
 }
 
-type _UserInfo struct {
+type OKCoinFuturesUserInfo struct {
+	Info struct {
+		BTC struct {
+			AccountRights float64 `json:"account_rights"`
+			KeepDeposit   float64 `json:"keep_deposit"`
+			ProfitReal    float64 `json:"profit_real"`
+			ProfitUnreal  float64 `json:"profit_unreal"`
+			RiskRate      float64 `json:"risk_rate"`
+		} `json:"btc"`
+		LTC struct {
+			AccountRights float64 `json:"account_rights"`
+			KeepDeposit   float64 `json:"keep_deposit"`
+			ProfitReal    float64 `json:"profit_real"`
+			ProfitUnreal  float64 `json:"profit_unreal"`
+			RiskRate      float64 `json:"risk_rate"`
+		} `json:"ltc"`
+	} `json:"info"`
+	Result bool `json:"result"`
+}
+
+type OKCoinUserInfo struct {
 	Info struct {
 		Funds struct {
 			Asset struct {
@@ -155,7 +174,7 @@ type _UserInfo struct {
 	Result bool `json:"result"`
 }
 
-type _BatchTrade struct {
+type OKCoinBatchTrade struct {
 	OrderInfo []struct {
 		OrderID   int64 `json:"order_id"`
 		ErrorCode int64 `json:"error_code"`
@@ -163,12 +182,12 @@ type _BatchTrade struct {
 	Result bool `json:"result"`
 }
 
-type _CancelOrderResponse struct {
+type OKCoinCancelOrderResponse struct {
 	Success string
 	Error   string
 }
 
-type _OrderInfo struct {
+type OKCoinOrderInfo struct {
 	Amount     float64 `json:"amount"`
 	AvgPrice   float64 `json:"avg_price"`
 	Created    int64   `json:"create_date"`
@@ -181,20 +200,20 @@ type _OrderInfo struct {
 	Type       string  `json:"type"`
 }
 
-type _OrderHistory struct {
+type OKCoinOrderHistory struct {
 	CurrentPage int               `json:"current_page"`
-	Orders      []_OrderInfo `json:"orders"`
+	Orders      []OKCoinOrderInfo `json:"orders"`
 	PageLength  int               `json:"page_length"`
 	Result      bool              `json:"result"`
 	Total       int               `json:"total"`
 }
 
-type _WithdrawalResponse struct {
+type OKCoinWithdrawalResponse struct {
 	WithdrawID int  `json:"withdraw_id"`
 	Result     bool `json:"result"`
 }
 
-type _WithdrawInfo struct {
+type OKCoinWithdrawInfo struct {
 	Address    string  `json:"address"`
 	Amount     float64 `json:"amount"`
 	Created    int64   `json:"created_date"`
@@ -203,30 +222,30 @@ type _WithdrawInfo struct {
 	WithdrawID int64   `json:"withdraw_id"`
 }
 
-type _OrderFeeInfo struct {
+type OKCoinOrderFeeInfo struct {
 	Fee     float64 `json:"fee,string"`
 	OrderID int64   `json:"order_id"`
 	Type    string  `json:"type"`
 }
 
-type _LendDepth struct {
+type OKCoinLendDepth struct {
 	Amount float64 `json:"amount"`
 	Days   string  `json:"days"`
 	Num    int64   `json:"num"`
 	Rate   float64 `json:"rate,string"`
 }
 
-type _BorrowResponse struct {
+type OKCoinBorrowResponse struct {
 	Result   bool `json:"result"`
 	BorrowID int  `json:"borrow_id"`
 }
 
-type _WebsocketFutureIndex struct {
+type OKCoinWebsocketFutureIndex struct {
 	FutureIndex float64 `json:"futureIndex"`
 	Timestamp   int64   `json:"timestamp,string"`
 }
 
-type _WebsocketTicker struct {
+type OKCoinWebsocketTicker struct {
 	Timestamp float64
 	Vol       string
 	Buy       float64
@@ -236,7 +255,7 @@ type _WebsocketTicker struct {
 	Sell      float64
 }
 
-type _WebsocketFuturesTicker struct {
+type OKCoinWebsocketFuturesTicker struct {
 	Buy        float64 `json:"buy"`
 	ContractID string  `json:"contractId"`
 	High       float64 `json:"high"`
@@ -248,13 +267,13 @@ type _WebsocketFuturesTicker struct {
 	Volume     float64 `json:"vol,string"`
 }
 
-type _WebsocketOrderbook struct {
+type OKCoinWebsocketOrderbook struct {
 	Asks      [][]float64 `json:"asks"`
 	Bids      [][]float64 `json:"bids"`
 	Timestamp int64       `json:"timestamp,string"`
 }
 
-type _WebsocketUserinfo struct {
+type OKCoinWebsocketUserinfo struct {
 	Info struct {
 		Funds struct {
 			Asset struct {
@@ -278,7 +297,7 @@ type _WebsocketUserinfo struct {
 	Result bool `json:"result"`
 }
 
-type _WebsocketFuturesContract struct {
+type OKCoinWebsocketFuturesContract struct {
 	Available    float64 `json:"available"`
 	Balance      float64 `json:"balance"`
 	Bond         float64 `json:"bond"`
@@ -289,23 +308,23 @@ type _WebsocketFuturesContract struct {
 	Loss         float64 `json:"unprofit"`
 }
 
-type _WebsocketFuturesUserInfo struct {
+type OKCoinWebsocketFuturesUserInfo struct {
 	Info struct {
 		BTC struct {
 			Balance   float64                          `json:"balance"`
-			Contracts []_WebsocketFuturesContract `json:"contracts"`
+			Contracts []OKCoinWebsocketFuturesContract `json:"contracts"`
 			Rights    float64                          `json:"rights"`
 		} `json:"btc"`
 		LTC struct {
 			Balance   float64                          `json:"balance"`
-			Contracts []_WebsocketFuturesContract `json:"contracts"`
+			Contracts []OKCoinWebsocketFuturesContract `json:"contracts"`
 			Rights    float64                          `json:"rights"`
 		} `json:"ltc"`
 	} `json:"info"`
 	Result bool `json:"result"`
 }
 
-type _WebsocketOrder struct {
+type OKCoinWebsocketOrder struct {
 	Amount      float64 `json:"amount"`
 	AvgPrice    float64 `json:"avg_price"`
 	DateCreated float64 `json:"create_date"`
@@ -318,7 +337,7 @@ type _WebsocketOrder struct {
 	OrderType   string  `json:"type"`
 }
 
-type _WebsocketFuturesOrder struct {
+type OKCoinWebsocketFuturesOrder struct {
 	Amount         float64 `json:"amount"`
 	ContractName   string  `json:"contract_name"`
 	DateCreated    float64 `json:"createdDate"`
@@ -334,7 +353,7 @@ type _WebsocketFuturesOrder struct {
 	UnitAmount     float64 `json:"unit_amount"`
 }
 
-type _WebsocketRealtrades struct {
+type OKCoinWebsocketRealtrades struct {
 	AveragePrice         float64 `json:"averagePrice,string"`
 	CompletedTradeAmount float64 `json:"completedTradeAmount,string"`
 	DateCreated          float64 `json:"createdDate"`
@@ -351,7 +370,7 @@ type _WebsocketRealtrades struct {
 	UnTrade              float64 `json:"unTrade,string"`
 }
 
-type _WebsocketFuturesRealtrades struct {
+type OKCoinWebsocketFuturesRealtrades struct {
 	Amount         float64 `json:"amount,string"`
 	ContractID     float64 `json:"contract_id,string"`
 	ContractName   string  `json:"contract_name"`
@@ -367,29 +386,67 @@ type _WebsocketFuturesRealtrades struct {
 	LeverageAmount int     `json:"lever_rate,string"`
 }
 
-type _WebsocketEvent struct {
+type OKCoinWebsocketEvent struct {
 	Event   string `json:"event"`
 	Channel string `json:"channel"`
 }
 
-type _WebsocketResponse struct {
+type OKCoinWebsocketResponse struct {
 	Channel string      `json:"channel"`
 	Data    interface{} `json:"data"`
 }
 
-type _WebsocketEventAuth struct {
+type OKCoinWebsocketEventAuth struct {
 	Event      string            `json:"event"`
 	Channel    string            `json:"channel"`
 	Parameters map[string]string `json:"parameters"`
 }
 
-type _WebsocketEventAuthRemove struct {
+type OKCoinWebsocketEventAuthRemove struct {
 	Event      string            `json:"event"`
 	Channel    string            `json:"channel"`
 	Parameters map[string]string `json:"parameters"`
 }
 
-type _WebsocketTradeOrderResponse struct {
+type OKCoinWebsocketTradeOrderResponse struct {
 	OrderID int64 `json:"order_id,string"`
 	Result  bool  `json:"result,string"`
+}
+
+type OKCoinFuturesPosition struct {
+	ForceLiquPrice float64 `json:"force_liqu_price,string"`
+	Holding []struct {
+		BuyAmount      float64 `json:"buy_amount"`
+		BuyAvailable   float64 `json:"buy_available"`
+		BuyPriceAvg    float64 `json:"buy_price_avg"`
+		BuyPriceCost   float64 `json:"buy_price_cost"`
+		BuyProfitReal  float64 `json:"buy_profit_real"`
+		ContractId     int64 `json:"contract_id"`
+		ContractType   string `json:"contract_type"`
+		CreateDate     int64 `json:"create_date"`
+		LeverRate      int32 `json:"lever_rate"`
+		SellAmount     float64 `json:"sell_amount"`
+		SellAvailable  float64 `json:"sell_available"`
+		SellPriceAvg   float64 `json:"sell_price_avg"`
+		SellPriceCost  float64 `json:"sell_price_cost"`
+		SellProfitReal float64 `json:"sell_profit_real"`
+		Symbol         string `json:"symbol"`
+	} `json:"holding"`
+	Result bool `json:"result"`
+}
+
+type OKCoinFuturesOrderInfo struct {
+	Amount       float64 `json:"amount"`
+	ContractName string `json:"contract_name"`
+	CreateDate   int64 `json:"create_date"`
+	DealAmount   float64 `json:"deal_amount"`
+	Fee          float64 `json:"fee"`
+	OrderID      int64   `json:"order_id"`
+	Price        float64 `json:"price"`
+	AvgPrice     float64 `json:"avg_price"`
+	Status       int32 `json:"status"`
+	Symbol       string  `json:"symbol"`
+	Type         int32  `json:"type"`
+	UnitAmount   int32 `json:"unit_amount"`
+	LeverRate    int32 `json:"lever_rate"`
 }

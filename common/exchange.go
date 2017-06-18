@@ -1,14 +1,21 @@
 package common
 
-import "net/http"
+import (
+	"time"
+)
 
 type ExchangeBase struct {
-	Name       string
-	Enable     bool
-	BaseUri    string
-	HttpClient *http.Client
-	ApiKey     string
-	SecretKey  string
-	TakerFee   float64
-	MakerFee   float64
+	Name                        string
+	Enabled                     bool
+	Verbose                     bool
+	Websocket                   bool
+	RESTPollingDelay            time.Duration
+	AuthenticatedAPISupport     bool
+	APISecret, APIKey, ClientID string
+	TakerFee, MakerFee, Fee     float64
+	BaseCurrencies              []string
+	AvailablePairs              []string
+	EnabledPairs                []string
+	WebsocketURL                string
+	APIUrl                      string
 }

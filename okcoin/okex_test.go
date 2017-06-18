@@ -1,167 +1,127 @@
 package okcoin
 
 import (
-	"net/http"
 	"testing"
+	"github.com/zaviichen/gexch/common"
 	"time"
-	. "gexch/common"
 )
 
-var fccy CurrencyPair = BTC_USD
+var fccy string = "btc_usd"
 var fcontract = Weekly
-var okex = NewOKEx(http.DefaultClient, OKComApiKey, OKComSecretKey)
+var okex = NewOKEx(common.OKComApiKey, common.OKComSecretKey)
 
-func TestOKEx_GetFutTicker(t *testing.T) {
-	ticker, err := okex.GetFutTicker(fccy, fcontract)
+func TestOKCoin_GetFuturesTicker(t *testing.T) {
+	v, err := okex.GetFuturesTicker(fccy, fcontract)
 	if err == nil {
-		t.Logf("Ticker: %+v", ticker)
+		t.Logf("GetFuturesTicker: %+v", v)
 	} else {
 		t.Error(err)
 	}
 }
 
-func TestOKEx_GetFutDepth(t *testing.T) {
-	depth, err := okex.GetFutDepth(fccy, fcontract, 5)
+func TestOKCoin_GetFuturesDepth(t *testing.T) {
+	v, err := okex.GetFuturesDepth(fccy, fcontract, 5, false)
 	if err == nil {
-		t.Logf("Depth: %+v", depth)
+		t.Logf("GetFuturesDepth: %+v", v)
 	} else {
 		t.Error(err)
 	}
 }
 
-func TestOKEx_GetFutTrades(t *testing.T) {
-	trades, err := okex.GetFutTrades(fccy, fcontract)
+func TestOKCoin_GetFuturesTrades(t *testing.T) {
+	v, err := okex.GetFuturesTrades(fccy, fcontract)
 	if err == nil {
-		t.Logf("Trades: %+v", trades)
+		t.Logf("GetFuturesTrades: #=%d, %+v", len(v), v[:5])
 	} else {
 		t.Error(err)
 	}
 }
 
-func TestOKEx_GetFutIndex(t *testing.T) {
-	index, err := okex.GetFutIndex(fccy)
+func TestOKCoin_GetFuturesIndex(t *testing.T) {
+	v, err := okex.GetFuturesIndex(fccy)
 	if err == nil {
-		t.Logf("Index: %+v", index)
+		t.Logf("GetFuturesIndex: %+v", v)
 	} else {
 		t.Error(err)
 	}
 }
 
-func TestOKEx_GetFutEstimatedPrice(t *testing.T) {
-	index, err := okex.GetFutEstimatedPrice(fccy)
+func TestOKCoin_GetFuturesExchangeRate(t *testing.T) {
+	v, err := okex.GetFuturesExchangeRate()
 	if err == nil {
-		t.Logf("Forecast Price: %+v", index)
+		t.Logf("GetFuturesExchangeRate: %+v", v)
 	} else {
 		t.Error(err)
 	}
 }
 
-func TestOKEx_GetFutureInfo(t *testing.T) {
-	info, err := okex.GetFutureInfo(fccy, fcontract)
+func TestOKCoin_GetFuturesEstimatedPrice(t *testing.T) {
+	v, err := okex.GetFuturesEstimatedPrice(fccy)
 	if err == nil {
-		t.Logf("Future Info: %+v", info)
+		t.Logf("GetFuturesEstimatedPrice: %+v", v)
 	} else {
 		t.Error(err)
 	}
 }
 
-func TestOKEx_GetFutAccount(t *testing.T) {
-	dat, err := okex.GetFutAccount()
+func TestOKCoin_GetFuturesKline(t *testing.T) {
+	v, err := okex.GetFuturesKline(fccy, "1min", fcontract, 5, 0)
 	if err == nil {
-		t.Logf("Future Account: %+v", dat)
+		t.Logf("GetFuturesKline: %+v", v)
 	} else {
 		t.Error(err)
 	}
 }
 
-func TestOKEx_GetFutPosition(t *testing.T) {
-	dat, err := okex.GetFutPosition(fccy, fcontract)
+func TestOKCoin_GetFuturesHoldAmount(t *testing.T) {
+	v, err := okex.GetFuturesHoldAmount(fccy, fcontract)
 	if err == nil {
-		t.Logf("Future Position: %+v", dat)
+		t.Logf("GetFuturesHoldAmount: %+v", v)
 	} else {
 		t.Error(err)
 	}
 }
 
-func TestOKEx_BuyOrders(t *testing.T) {
-	depth, err := okex.GetFutDepth(fccy, fcontract, 10)
-
-	ob := depth.BidList[len(depth.BidList)-1]
-	order, err := okex.SendFutOrder(fccy, fcontract, ob.Price, 1, 1, 0, 20)
+func TestOKCoin_GetFuturesUserInfo(t *testing.T) {
+	v, err := okex.GetFuturesUserInfo()
 	if err == nil {
-		t.Logf("Send BuyOrder: %+v", order)
-	} else {
-		t.Error(err)
-	}
-
-	ids := []string{order.OrderID}
-	orders, err := okex.GetFutOrders(fccy, fcontract, ids)
-	if err == nil {
-		t.Logf("Gey BuyOrders: %+v", orders)
-	} else {
-		t.Error(err)
-	}
-
-	openOrders, err := okex.GetFutOpenOrders(fccy, fcontract)
-	if err == nil {
-		t.Logf("Gey OpenOrders: %+v", openOrders)
-	} else {
-		t.Error(err)
-	}
-
-	status, err := okex.CancelFutOrder(fccy, fcontract, order.OrderID)
-	if status == true {
-		t.Logf("Cancel BuyOrder: %+v", status)
-	} else {
-		t.Error(err)
-	}
-
-	time.Sleep(2 * time.Second)
-	openOrders, err = okex.GetFutOpenOrders(fccy, fcontract)
-	if err == nil {
-		t.Logf("Gey OpenOrders after cancellation: %+v", openOrders)
+		t.Logf("GetFuturesUserInfo: %+v", v)
 	} else {
 		t.Error(err)
 	}
 }
 
-func TestOKEx_SellOrders(t *testing.T) {
-	depth, err := okex.GetFutDepth(fccy, fcontract, 10)
-
-	ob := depth.AskList[len(depth.AskList)-1]
-	order, err := okex.SendFutOrder(fccy, fcontract, ob.Price, 1, 2, 0, 20)
+func TestOKCoin_GetFuturesPosition(t *testing.T) {
+	v, err := okex.GetFuturesPosition(fccy, fcontract)
 	if err == nil {
-		t.Logf("Send SellOrder: %+v", order)
+		t.Logf("GetFuturesPosition: %+v", v)
+	} else {
+		t.Error(err)
+	}
+}
+
+func TestOKCoin_PlaceOrders(t *testing.T) {
+	depth, err := okex.GetFuturesDepth(fccy, fcontract, 10, false)
+
+	ob := depth.Bids[len(depth.Bids)-1]
+	orderid, err := okex.FuturesTrade(fccy, fcontract, OpenLong, ob[0], 1, 0, 20)
+	if err == nil {
+		t.Logf("Send BuyOrder: %+v", orderid)
 	} else {
 		t.Error(err)
 	}
 
-	ids := []string{order.OrderID}
-	orders, err := okex.GetFutOrders(fccy, fcontract, ids)
+	time.Sleep(200 * time.Millisecond)
+	orders, err := okex.GetFuturesOrdersInfo(fccy, fcontract, orderid)
 	if err == nil {
-		t.Logf("Gey BuyOrders: %+v", orders)
+		t.Logf("Get BuyOrder: %+v", orders)
 	} else {
 		t.Error(err)
 	}
 
-	openOrders, err := okex.GetFutOpenOrders(fccy, fcontract)
+	orderid, err = okex.CancelFuturesOrder(fccy, fcontract, orders[0].OrderID)
 	if err == nil {
-		t.Logf("Gey OpenOrders: %+v", openOrders)
-	} else {
-		t.Error(err)
-	}
-
-	status, err := okex.CancelFutOrder(fccy, fcontract, order.OrderID)
-	if status == true {
-		t.Logf("Cancel BuyOrder: %+v", status)
-	} else {
-		t.Error(err)
-	}
-
-	time.Sleep(2 * time.Second)
-	openOrders, err = okex.GetFutOpenOrders(fccy, fcontract)
-	if err == nil {
-		t.Logf("Gey OpenOrders after cancellation: %+v", openOrders)
+		t.Logf("Cancel BuyOrder: %+v", orderid)
 	} else {
 		t.Error(err)
 	}

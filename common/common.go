@@ -27,7 +27,7 @@ import (
 )
 
 const (
-	HASH_SHA1 = iota
+	HASH_SHA1        = iota
 	HASH_SHA256
 	HASH_SHA512
 	HASH_SHA512_384
