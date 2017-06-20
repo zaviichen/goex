@@ -182,11 +182,6 @@ type OKCoinBatchTrade struct {
 	Result bool `json:"result"`
 }
 
-type OKCoinCancelOrderResponse struct {
-	Success string
-	Error   string
-}
-
 type OKCoinOrderInfo struct {
 	Amount     float64 `json:"amount"`
 	AvgPrice   float64 `json:"avg_price"`
