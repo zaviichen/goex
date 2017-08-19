@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"github.com/zaviichen/gexch/common"
 	"log"
+	"github.com/gorilla/websocket"
 )
 
 const (
@@ -45,6 +46,7 @@ const (
 type OKEx struct {
 	common.ExchangeBase
 	OpenFee, CloseFee, DeliveryFee float64
+	WebsocketConn                  *websocket.Conn
 }
 
 func NewOKEx(api string, secret string) *OKEx {

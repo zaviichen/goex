@@ -252,20 +252,26 @@ type OKCoinWebsocketTicker struct {
 
 type OKCoinWebsocketFuturesTicker struct {
 	Buy        float64 `json:"buy"`
-	ContractID string  `json:"contractId"`
-	High       float64 `json:"high"`
-	HoldAmount float64 `json:"hold_amount"`
-	Last       float64 `json:"last,string"`
-	Low        float64 `json:"low"`
 	Sell       float64 `json:"sell"`
+	Last       float64 `json:"last"`
+	High       float64 `json:"high"`
+	Low        float64 `json:"low"`
+	HoldAmount float64 `json:"hold_amount"`
 	UnitAmount float64 `json:"unitAmount"`
-	Volume     float64 `json:"vol,string"`
+	Volume     float64 `json:"vol"`
+	LimitHigh  float64 `json:"limitHigh,string"`
+	LimitLow   float64 `json:"limitLow,string"`
+	ContractID int64   `json:"contractId"`
 }
 
 type OKCoinWebsocketOrderbook struct {
-	Asks      [][]float64 `json:"asks"`
-	Bids      [][]float64 `json:"bids"`
-	Timestamp int64       `json:"timestamp,string"`
+	Asks      [][]string `json:"asks"`
+	Bids      [][]string `json:"bids"`
+	Timestamp int64       `json:"timestamp"`
+}
+
+type OKCoinWebsocketFuturesTrade struct {
+	Trades [][]string
 }
 
 type OKCoinWebsocketUserinfo struct {
