@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"log"
-	"github.com/zaviichen/gexch/okcoin"
-	"github.com/zaviichen/gexch/common"
+	"github.com/zaviichen/goex/okcoin"
+	"github.com/zaviichen/goex/common"
 	"time"
 	"errors"
 	"strings"

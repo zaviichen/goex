@@ -1,7 +1,7 @@
 package okcoin
 
 import (
-	"github.com/zaviichen/gexch/common"
+	"github.com/zaviichen/goex/common"
 	"net/url"
 	"strconv"
 	"errors"

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"log"
 	"errors"
-	"github.com/zaviichen/gexch/common"
+	"github.com/zaviichen/goex/common"
 )
 
 func SendAuthenticatedHTTPRequest(api, secret, baseuri string, verbose bool, method string, v url.Values, result interface{}) (err error) {

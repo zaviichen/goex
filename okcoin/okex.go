@@ -3,7 +3,7 @@ package okcoin
 import (
 	"strconv"
 	"net/url"
-	"github.com/zaviichen/gexch/common"
+	"github.com/zaviichen/goex/common"
 	"log"
 	"github.com/gorilla/websocket"
 )

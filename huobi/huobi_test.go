@@ -3,7 +3,7 @@ package huobi
 import (
 	"net/http"
 	"testing"
-	. "gexch/common"
+	. "goex/common"
 )
 
 var ccy CurrencyPair = BTC_CNY

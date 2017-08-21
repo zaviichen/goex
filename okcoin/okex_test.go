@@ -2,7 +2,7 @@ package okcoin
 
 import (
 	"testing"
-	"github.com/zaviichen/gexch/common"
+	"github.com/zaviichen/goex/common"
 	"time"
 )
 

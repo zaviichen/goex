@@ -2,7 +2,7 @@ package okcoin
 
 import (
 	"time"
-	"github.com/zaviichen/gexch/types"
+	"github.com/zaviichen/goex/types"
 	"strconv"
 )
 

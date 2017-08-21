@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/zaviichen/gexch/common"
+	"github.com/zaviichen/goex/common"
 	"errors"
 	"strings"
 	//"strconv"
