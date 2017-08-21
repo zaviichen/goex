@@ -10,6 +10,9 @@ import (
 	"github.com/zaviichen/gexch/common"
 	"errors"
 	"strings"
+	//"strconv"
+	"net/url"
+	"encoding/json"
 )
 
 const (
@@ -33,6 +36,14 @@ func (o *OKEx) WsConnect() (error) {
 	if o.Verbose {
 		log.Printf("%s Connected to Websocket.\n", o.Name)
 	}
+
+	//heartbeat := func() {
+	//	for {
+	//		_ = o.WebsocketConn.WriteMessage(websocket.TextMessage, []byte("{'event':'ping'}"))
+	//		time.Sleep(10 * time.Second)
+	//	}
+	//}
+	//go heartbeat()
 
 	o.WebsocketConn.SetPingHandler(o.PingHandler)
 	o.WebsocketConn.SetCloseHandler(o.CloseHandler)
@@ -70,6 +81,78 @@ func (o *OKEx) AddChannel(channel string) {
 
 	if o.Verbose {
 		log.Printf("%s Adding channel: %s\n", o.Name, channel)
+	}
+}
+
+func (o *OKEx) AddUserInfo() {
+	v := url.Values{}
+	v.Set("api_key", o.APIKey)
+	hasher := common.GetMD5([]byte(v.Encode() + "&secret_key=" + o.APISecret))
+	sign := strings.ToUpper(common.HexEncodeToString(hasher))
+	v.Set("sign", sign)
+
+	p := make(map[string]string)
+	p["api_key"] = o.APIKey
+	p["sign"] = sign
+
+	m := make(map[string]interface{})
+	m["event"] = "addChannel"
+	m["channel"] = "ok_futureusd_userinfo"
+	m["parameters"] = p
+
+	//json, err := common.JSONEncode(m)
+	jsonStr, err := json.Marshal(m)
+	log.Println(string(jsonStr))
+	log.Println(err)
+
+	//msg := "{'event':'addChannel', 'channel':'ok_futureusd_orderinfo','parameters': {'api_key':'f8d3e594-991d-48d5-9560-9d4193733290',sign':'XXXX','symbol':'ltc_usd','order_id':'-1', 'contract_type':'this_week','status':'1','current_page':'1','page_length':'1'}}"
+	msg := `{"channel":"ok_futureusd_userinfo","event":"addChannel","parameters":{"api_key":"f8d3e594-991d-48d5-9560-9d4193733290","sign":"3CA9460C0E60ED9007B67D420C8DCAA7"}}`
+	err = o.WebsocketConn.WriteMessage(websocket.TextMessage, []byte(msg))
+	//err = o.WebsocketConn.WriteMessage(websocket.TextMessage, jsonStr)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+}
+
+func (o *OKEx) AddOrderInfo() {
+	v := url.Values{}
+	v.Set("api_key", o.APIKey)
+	v.Set("symbol", "ltc_usd")
+	v.Set("contract_type", "this_week")
+	v.Set("order_id", "-1")
+	v.Set("status", "1")
+	v.Set("current_page", "1")
+	v.Set("page_length", "1")
+	hasher := common.GetMD5([]byte(v.Encode() + "&secret_key=" + o.APISecret))
+	sign := strings.ToUpper(common.HexEncodeToString(hasher))
+	v.Set("sign", sign)
+
+	p := make(map[string]string)
+	p["api_key"] = o.APIKey
+	p["symbol"] = "ltc_usd"
+	p["contract_type"] = "this_week"
+	p["order_id"] = "-1"
+	p["status"] = "1"
+	p["current_page"] = "1"
+	p["page_length"] = "1"
+	p["sign"] = sign
+
+	m := make(map[string]interface{})
+	m["event"] = "addChannel"
+	m["channel"] = "ok_futureusd_orderinfo"
+	m["parameters"] = p
+
+	//json, err := common.JSONEncode(m)
+	jsonStr, err := json.Marshal(m)
+	log.Println(string(jsonStr))
+	log.Println(err)
+
+	//msg := "{'event':'addChannel', 'channel':'ok_futureusd_orderinfo','parameters': {'api_key':'f8d3e594-991d-48d5-9560-9d4193733290',sign':'XXXX','symbol':'ltc_usd','order_id':'-1', 'contract_type':'this_week','status':'1','current_page':'1','page_length':'1'}}"
+	err = o.WebsocketConn.WriteMessage(websocket.TextMessage, jsonStr)
+	if err != nil {
+		log.Println(err)
+		return
 	}
 }
 
