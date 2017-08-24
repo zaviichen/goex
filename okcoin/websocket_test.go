@@ -13,8 +13,6 @@ import (
 )
 
 func TestOKEx_WsOrders(t *testing.T) {
-	apiKey := "f8d3e594-991d-48d5-9560-9d4193733290"
-	secretKey := "6595A5938CDB28DA31DA9D39F71FEE7B"
 	o := NewOKEx(apiKey, secretKey)
 
 	err := o.WsConnect()

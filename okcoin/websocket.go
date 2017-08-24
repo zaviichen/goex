@@ -105,8 +105,6 @@ func (o *OKEx) AddUserInfo() {
 	log.Println(string(jsonStr))
 	log.Println(err)
 
-	//msg := "{'event':'addChannel', 'channel':'ok_futureusd_orderinfo','parameters': {'api_key':'f8d3e594-991d-48d5-9560-9d4193733290',sign':'XXXX','symbol':'ltc_usd','order_id':'-1', 'contract_type':'this_week','status':'1','current_page':'1','page_length':'1'}}"
-	msg := `{"channel":"ok_futureusd_userinfo","event":"addChannel","parameters":{"api_key":"f8d3e594-991d-48d5-9560-9d4193733290","sign":"3CA9460C0E60ED9007B67D420C8DCAA7"}}`
 	err = o.WebsocketConn.WriteMessage(websocket.TextMessage, []byte(msg))
 	//err = o.WebsocketConn.WriteMessage(websocket.TextMessage, jsonStr)
 	if err != nil {
@@ -148,7 +146,6 @@ func (o *OKEx) AddOrderInfo() {
 	log.Println(string(jsonStr))
 	log.Println(err)
 
-	//msg := "{'event':'addChannel', 'channel':'ok_futureusd_orderinfo','parameters': {'api_key':'f8d3e594-991d-48d5-9560-9d4193733290',sign':'XXXX','symbol':'ltc_usd','order_id':'-1', 'contract_type':'this_week','status':'1','current_page':'1','page_length':'1'}}"
 	err = o.WebsocketConn.WriteMessage(websocket.TextMessage, jsonStr)
 	if err != nil {
 		log.Println(err)
